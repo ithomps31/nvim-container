@@ -1,3 +1,3 @@
 #!/bin/env bash
 
-buildah build --tag quay.io/plebs_inc/nvim:small -f Containerfile .
+buildah build --tag quay.io/plebs_inc/nvim:latest -f Containerfile .
