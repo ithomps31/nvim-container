@@ -1,3 +1,3 @@
 #!/bin/env bash
 
-docker build --tag quay.io/plebs_inc/nvim:multi -f Containerfile .
+docker build --tag quay.io/plebs_inc/nvim:release -f Containerfile .
