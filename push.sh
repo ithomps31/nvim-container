@@ -1,3 +1,5 @@
 #!/bin/env bash
 
-buildah push quay.io/plebs_inc/nvim:09-23
+TAG_NAME="minimal"
+
+buildah push quay.io/plebs_inc/nvim:${TAG_NAME}

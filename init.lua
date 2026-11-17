@@ -1,16 +1,10 @@
 vim.pack.add({
-	{
-		src = "https://github.com/rose-pine/neovim",
-		name = "rose-pine",
-	},
+    {
+        src = "https://github.com/rose-pine/neovim",
+        name = "rose-pine",
+    },
   { src = 'https://github.com/neovim/nvim-lspconfig' },
   { src = 'https://github.com/windwp/nvim-autopairs' },
-  -- { src = 'https://github.com/j-hui/fidget.nvim' },
-  -- { src = 'https://github.com/hrsh7th/cmp-nvim-lsp' },
-  -- { src = 'https://github.com/hrsh7th/cmp-buffer' },
-  -- { src = 'https://github.com/hrsh7th/cmp-path' },
-  -- { src = 'https://github.com/hrsh7th/cmp-cmdline' },
-  -- { src = 'https://github.com/hrsh7th/nvim-cmp' },
 })
 
 require("rose-pine").setup()
@@ -29,53 +23,50 @@ vim.keymap.set("n", "N", "Nzzzv")
 
 vim.keymap.set("n", "<leader>y", "\"+y")
 vim.keymap.set("n", "<leader>m", "\"+p")
---
---
+
 -- File Type Specific Stuff
---autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
---autocmd FileType pug setlocal ts=2 sts=2 sw=2 expandtab
 vim.api.nvim_create_autocmd('FileType', {
     pattern = 'yaml',
     callback = function()
-	    vim.opt.tabstop = 2
-	    vim.opt.softtabstop = 2
-	    vim.opt.shiftwidth = 2
+        vim.opt.tabstop = 2
+        vim.opt.softtabstop = 2
+        vim.opt.shiftwidth = 2
     end,
 })
 
 vim.api.nvim_create_autocmd('FileType', {
     pattern = 'pug',
     callback = function()
-	    vim.opt.tabstop = 2
-	    vim.opt.softtabstop = 2
-	    vim.opt.shiftwidth = 2
+        vim.opt.tabstop = 2
+        vim.opt.softtabstop = 2
+        vim.opt.shiftwidth = 2
     end,
 })
 
 vim.api.nvim_create_autocmd('FileType', {
     pattern = 'lua',
     callback = function()
-	    vim.opt.tabstop = 2
-	    vim.opt.softtabstop = 2
-	    vim.opt.shiftwidth = 2
+        vim.opt.tabstop = 2
+        vim.opt.softtabstop = 2
+        vim.opt.shiftwidth = 2
     end,
 })
 
 vim.api.nvim_create_autocmd('FileType', {
     pattern = 'css',
     callback = function()
-	    vim.opt.tabstop = 2
-	    vim.opt.softtabstop = 2
-	    vim.opt.shiftwidth = 2
+        vim.opt.tabstop = 2
+        vim.opt.softtabstop = 2
+        vim.opt.shiftwidth = 2
     end,
 })
 
 vim.api.nvim_create_autocmd('FileType', {
     pattern = 'go',
     callback = function()
-	    vim.opt.tabstop = 4
-	    vim.opt.softtabstop = 4
-	    vim.opt.shiftwidth = 4
+        vim.opt.tabstop = 4
+        vim.opt.softtabstop = 4
+        vim.opt.shiftwidth = 4
     end,
 })
 
@@ -99,12 +90,13 @@ vim.opt.incsearch = true
 
 vim.opt.termguicolors = true
 
--- require("core.lsp")
 ---@param repo string
 ---@return string
-local function gh(repo) return 'https://github.com/'
+local function gh(repo)
+  return 'https://github.com/' .. repo
+end
 
-  ---@type (string | vim.pack.Spec)[]
+---@type (string | vim.pack.Spec)[]
   local telescope_plugins = {
     gh 'nvim-lua/plenary.nvim',
     gh 'nvim-telescope/telescope.nvim',
@@ -118,11 +110,9 @@ local function gh(repo) return 'https://github.com/'
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
     },
   }
-  -- Enable Telescope extensions if they are installed
   pcall(require('telescope').load_extension, 'fzf')
   pcall(require('telescope').load_extension, 'ui-select')
 
-  -- See `:help telescope.builtin`
   local builtin = require 'telescope.builtin'
   vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
   vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
@@ -194,12 +184,9 @@ local function gh(repo) return 'https://github.com/'
   })
 
   local servers = {
-    stylua = {}, -- Used to format Lua code
-
-    -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
       on_init = function(client)
-        client.server_capabilities.documentFormattingProvider = false -- Disable formatting (formatting is done by stylua)
+        client.server_capabilities.documentFormattingProvider = false
 
         if client.workspace_folders then
           local path = client.workspace_folders[1].name
@@ -214,8 +201,6 @@ local function gh(repo) return 'https://github.com/'
           },
           workspace = {
             checkThirdParty = false,
-            -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
-            --  See https://github.com/neovim/nvim-lspconfig/issues/3189
             library = vim.api.nvim_get_runtime_file('', true),
           },
         })
@@ -223,9 +208,20 @@ local function gh(repo) return 'https://github.com/'
       ---@type lspconfig.settings.lua_ls
       settings = {
         Lua = {
-          format = { enable = false }, -- Disable formatting (formatting is done by stylua)
+          format = { enable = false },
         },
       },
+    },
+    python_lsp_server = {
+      cmd = { 'python-lsp-server' },
+      filetypes = { 'python' },
+      capabilities = (function()
+        local ok, blink = pcall(require, 'blink.cmp')
+        if ok then
+          return blink.get_lsp_capabilities()
+        end
+        return nil
+      end)(),
     },
   }
 
@@ -236,27 +232,13 @@ local function gh(repo) return 'https://github.com/'
     gh 'WhoIsSethDaniel/mason-tool-installer.nvim',
   }
 
-  -- Automatically install LSPs and related tools to stdpath for Neovim
   require('mason').setup {}
-
-  -- Translates between nvim-lspconfig server names and mason.nvim package names (e.g. lua_ls <-> lua-language-server)
   require('mason-lspconfig').setup {
-    automatic_enable = false, -- Change this to true if you want to automatically enable servers that are installed manually (e.g. via :Mason / :MasonInstall)
+    automatic_enable = false,
   }
 
-  -- Ensure the servers and tools above are installed
-  --
-  -- To check the current status of installed tools and/or manually install
-  -- other tools, you can run
-  --    :Mason
-  --
-  -- You can press `g?` for help in this menu.
-  local ensure_installed = vim.tbl_keys(servers or {})
-  vim.list_extend(ensure_installed, {
-    -- You can add other tools here that you want Mason to install
-  })
-
-  require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+  -- Exclude system-installed python-lsp-server from Mason's installer registry
+  require('mason-tool-installer').setup { ensure_installed = {} }
 
   for name, server in pairs(servers) do
     vim.lsp.config(name, server)
@@ -265,18 +247,12 @@ local function gh(repo) return 'https://github.com/'
 
 -- ============================================================
 -- SECTION 7: FORMATTING
--- conform.nvim setup and keymap
 -- ============================================================
-  -- [[ Formatting ]]
   vim.pack.add { gh 'stevearc/conform.nvim' }
   require('conform').setup {
     notify_on_error = false,
     format_on_save = function(bufnr)
-      -- You can specify filetypes to autoformat on save here:
-      local enabled_filetypes = {
-        -- lua = true,
-        -- python = true,
-      }
+      local enabled_filetypes = {}
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
       else
@@ -284,168 +260,47 @@ local function gh(repo) return 'https://github.com/'
       end
     end,
     default_format_opts = {
-      lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
+      lsp_format = 'fallback',
     },
-    -- You can also specify external formatters in here.
-    formatters_by_ft = {
-      -- rust = { 'rustfmt' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
-    },
+    formatters_by_ft = {},
   }
 
   vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })
 
 -- ============================================================
 -- SECTION 8: AUTOCOMPLETE & SNIPPETS
--- blink.cmp and luasnip setup
 -- ============================================================
-  -- [[ Snippet Engine ]]
-
-  -- NOTE: You can also specify plugin using a version range for its git tag.
-  --  See `:help vim.version.range()` for more info
   vim.pack.add { { src = gh 'L3MON4D3/LuaSnip', version = vim.version.range '2.*' } }
   require('luasnip').setup {}
 
-  -- `friendly-snippets` contains a variety of premade snippets.
-  --    See the README about individual language/framework/plugin snippets:
-  --    https://github.com/rafamadriz/friendly-snippets
-  --
-  -- vim.pack.add { gh 'rafamadriz/friendly-snippets' }
-  -- require('luasnip.loaders.from_vscode').lazy_load()
-
-  -- [[ Autocomplete Engine ]]
   vim.pack.add { { src = gh 'saghen/blink.cmp', version = vim.version.range '1.*' } }
   require('blink.cmp').setup {
     keymap = {
-      -- 'default' (recommended) for mappings similar to built-in completions
-      --   <c-y> to accept ([y]es) the completion.
-      --    This will auto-import if your LSP supports it.
-      --    This will expand snippets if the LSP sent a snippet.
-      -- 'super-tab' for tab to accept
-      -- 'enter' for enter to accept
-      -- 'none' for no mappings
-      --
-      -- For an understanding of why the 'default' preset is recommended,
-      -- you will need to read `:help ins-completion`
-      --
-      -- No, but seriously. Please read `:help ins-completion`, it is really good!
-      --
-      -- All presets have the following mappings:
-      -- <tab>/<s-tab>: move to right/left of your snippet expansion
-      -- <c-space>: Open menu or open docs if already open
-      -- <c-n>/<c-p> or <up>/<down>: Select next/previous item
-      -- <c-e>: Hide menu
-      -- <c-k>: Toggle signature help
-      --
-      -- See `:help blink-cmp-config-keymap` for defining your own keymap
       preset = 'default',
-
-      -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-      --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
     },
-
     appearance = {
-      -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
-      -- Adjusts spacing to ensure icons are aligned
       nerd_font_variant = 'mono',
     },
-
     completion = {
-      -- By default, you may press `<c-space>` to show the documentation.
-      -- Optionally, set `auto_show = true` to show the documentation after a delay.
       documentation = { auto_show = false, auto_show_delay_ms = 500 },
     },
-
     sources = {
       default = { 'lsp', 'path', 'snippets' },
     },
-
     snippets = { preset = 'luasnip' },
-
-    -- Blink.cmp includes an optional, recommended rust fuzzy matcher,
-    -- which automatically downloads a prebuilt binary when enabled.
-    --
-    -- By default, we use the Lua implementation instead, but you may enable
-    -- the rust implementation via `'prefer_rust_with_warning'`
-    --
-    -- See `:help blink-cmp-config-fuzzy` for more information
     fuzzy = { implementation = 'lua' },
-
-    -- Shows a signature help window while you type arguments for a function
     signature = { enabled = true },
   }
 
 -- ============================================================
 -- SECTION 9: TREESITTER
--- Parser installation, syntax highlighting, folds, indentation
 -- ============================================================
-  -- [[ Configure Treesitter ]]
-  --  Used to highlight, edit, and navigate code
-  --
-  --  See `:help nvim-treesitter-intro`
+vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
-  -- NOTE: You can also specify a branch or a specific commit
-  vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
-
-  -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
-  require('nvim-treesitter').install(parsers)
-
-  ---@param buf integer
-  ---@param language string
-  local function treesitter_try_attach(buf, language)
-    -- Check if a parser exists and load it
-    if not vim.treesitter.language.add(language) then return end
-
-    -- Check if the buffer is valid (might not be after install completes)
-    if not vim.api.nvim_buf_is_valid(buf) then return end
-
-    -- Enable syntax highlighting and other treesitter features
-    vim.treesitter.start(buf, language)
-
-    -- Enable treesitter based folds
-    -- For more info on folds see `:help folds`
-    -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-    -- vim.wo.foldmethod = 'expr'
-
-    -- Check if treesitter indentation is available for this language, and if so enable it
-    -- in case there is no indent query, the indentexpr will fallback to the vim's built in one
-    local has_indent_query = vim.treesitter.query.get(language, 'indents') ~= nil
-
-    -- Enable treesitter based indentation
-    if has_indent_query then vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()" end
-  end
-
-  local available_parsers = require('nvim-treesitter').get_available()
-  vim.api.nvim_create_autocmd('FileType', {
-    callback = function(args)
-      local buf, filetype = args.buf, args.match
-
-      local language = vim.treesitter.language.get_lang(filetype)
-      if not language then return end
-
-      local installed_parsers = require('nvim-treesitter').get_installed 'parsers'
-
-      if vim.tbl_contains(installed_parsers, language) then
-        -- Enable the parser if it is already installed
-        treesitter_try_attach(buf, language)
-      elseif vim.tbl_contains(available_parsers, language) then
-        -- If a parser is available in `nvim-treesitter`, auto-install it and enable it after the installation is done
-        require('nvim-treesitter').install(language):await(function() treesitter_try_attach(buf, language) end)
-      else
-        -- Try to enable treesitter features in case the parser exists but is not available from `nvim-treesitter`
-        treesitter_try_attach(buf, language)
-      end
-    end,
-  })
-
-vim.lsp.config['python-lsp-server'] = {
-  cmd = { 'python-lsp-server' },
-  filetypes = { 'python' },
-}
-
-vim.lsp.enable('python-lsp-server')
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'bash', 'c', 'diff', 'html', 'lua', 'markdown', 'vim', 'python', 'go', 'yaml', 'css' },
+  callback = function()
+    pcall(vim.treesitter.start)
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})
